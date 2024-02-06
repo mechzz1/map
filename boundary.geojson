@@ -1,0 +1,8 @@
+{
+"type": "FeatureCollection",
+"name": "boundary",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "Name": "Sobha Hartland", "description": "<img src=\"https://lh3.googleusercontent.com/umsh/AD1GIHMzmadaa3FT6ajCiFv8aBVcAwCb8zeT0t0rW8KtJM1SLGFl40hd067J7VJBtmWJJVRscf-Nrbil4XpUQ-xRe1B-qIvZb6ujABuW1jw5_N6Pv9gPkl1acMTu5YajLyIu5nNA0lAXjHQx2zL4S1SHHOpkAUqfNw\" height=\"200\" width=\"auto\" /><br><br>", "timestamp": null, "begin": null, "end": null, "altitudeMode": null, "tessellate": -1, "extrude": 0, "visibility": -1, "drawOrder": null, "icon": null, "gx_media_links": "https://lh3.googleusercontent.com/umsh/AD1GIHMzmadaa3FT6ajCiFv8aBVcAwCb8zeT0t0rW8KtJM1SLGFl40hd067J7VJBtmWJJVRscf-Nrbil4XpUQ-xRe1B-qIvZb6ujABuW1jw5_N6Pv9gPkl1acMTu5YajLyIu5nNA0lAXjHQx2zL4S1SHHOpkAUqfNw" }, "geometry": { "type": "Polygon", "coordinates": [ [ [ 55.297451, 25.1754078, 0.0 ], [ 55.300498, 25.1750681, 0.0 ], [ 55.3040814, 25.1748981, 0.0 ], [ 55.3063131, 25.1750194, 0.0 ], [ 55.3074825, 25.1750971, 0.0 ], [ 55.3085661, 25.1752913, 0.0 ], [ 55.3114199, 25.1759904, 0.0 ], [ 55.3150034, 25.1767089, 0.0 ], [ 55.3147352, 25.1784955, 0.0 ], [ 55.3136087, 25.1787867, 0.0 ], [ 55.3123266, 25.1791169, 0.0 ], [ 55.3109265, 25.1794179, 0.0 ], [ 55.3101325, 25.1792431, 0.0 ], [ 55.309639, 25.1796995, 0.0 ], [ 55.3065062, 25.1804325, 0.0 ], [ 55.3024292, 25.1811753, 0.0 ], [ 55.297451, 25.1754078, 0.0 ] ] ] } }
+]
+}

@@ -1,0 +1,584 @@
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.css" rel="stylesheet">
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.js"></script>
+    <style>
+        body { 
+            margin: 0; 
+            padding: 0; 
+            font-family: 'Poppins', sans-serif;
+        }
+
+        #map { 
+            position: absolute; top: 0; bottom: 0; width: 100%; 
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .div-marker {
+            width: 20px;
+            height: 20px;
+            background-color: white;
+            padding:5px;
+            overflow: hidden;
+            border-radius: 50%;
+            box-shadow: 0px 0px 0.1rem #000;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .div-marker div {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .div-marker img {
+            width: 70%;
+            object-fit: contain;
+        }
+
+        .mapboxgl-popup-close-button {
+            font-size: 20px;
+        } 
+
+        .mapboxgl-popup-content {
+            padding:0px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .popup-title {
+            font-size: 18px;
+            text-align: center;
+            font-weight: bold;
+            border-bottom: 1px solid #ddd;
+            padding:5px 0px;
+        }
+
+        .mapboxgl-popup {
+            max-width: 300px !important;
+        }
+
+        .popup-content {
+            width: 280px;
+            font-size: 14px;
+        }
+
+        .popup-body {
+            padding:10px;
+        }
+
+        .popup-item {
+            display:  flex;
+            justify-content: space-between;
+        }
+
+        .attr-label {
+            font-weight: bold;
+            text-transform: capitalize;
+        }
+        .visual-section {
+            position: absolute;
+            left:0px;
+            right:0px;
+            margin:10px;
+            width:250px;
+        }
+
+        .dropdown-toggler {
+            background-color: #fff;
+            width:100%;
+            box-shadow: 0px 0px 0.25rem #424242;
+            border-radius: 5px;
+            padding: 5px;
+            text-transform: uppercase;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .dropdown-section {
+            position: absolute;
+            width: 100%;
+            top:40px;
+            background-color: #fff;
+            box-shadow: 0px 0px 0.25rem #424242;
+            border-radius: 5px;
+        }
+
+        .dropdown-item {
+            padding:5px;
+            border-bottom: 1px solid #656565;
+            cursor: pointer;
+        }
+
+        .dropdown-item:hover {
+            background-color: #d2d2d2;
+            /* color:white; */
+        }
+
+        .dropdown-item.active {
+            background-color: #d2d2d2;
+            color:white;
+        }
+
+        .legend-container {
+            position: absolute;
+            left:0px;
+            bottom: 20px;
+            margin: 10px;
+            padding:10px;
+            background-color: #fff;
+            border-radius: 3px;
+            box-shadow: 0px 0px 0.25rem #444;
+        }
+
+        .legend-title {
+            text-transform: capitalize;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            text-transform:capitalize;
+        }
+
+        .legend-item .legend-card {
+            width: 20px;
+            height: 10px;
+            margin-right: 5px;
+        }
+
+        .d-none {
+            display: none !important;
+        }
+    </style>
+    <div class="map-container">
+        <div id="map"></div>
+        <div class="visual-section">
+            <div class="dropdown-toggler" id="dropdown-toggler" data-target="dropdown-toggler">
+                Visualize Type
+            </div>
+
+            <div class="dropdown-section d-none" id="dropdown-section">
+                <div class="dropdown-item active" data-visual="air-quality">Air Quality</div>
+                <div class="dropdown-item" data-visual="asset-performance">Asset Performance</div>
+                <div class="dropdown-item" data-visual="energy">Energy</div>
+                <div class="dropdown-item" data-visual="occupant-satisfaction">Occupant Satisfaction</div>
+                <div class="dropdown-item" data-visual="sustainability">Sustainability</div>
+            </div>
+        </div>
+
+        <div class="legend-container">
+            <div class="legend-title" id="legend-title">Air Quality</div>
+            <div class="legend-body" id="legend-body">
+                <div class="legend-body" id="legend-body"><div class="legend-item">
+                    <div class="legend-card" style="background-color: #9FCCAD;"></div>
+                    <div class="legend-text"> 0 - 3</div>
+                </div><div class="legend-item">
+                    <div class="legend-card" style="background-color: #FFD89C;"></div>
+                    <div class="legend-text"> 3 - 6</div>
+                </div><div class="legend-item">
+                    <div class="legend-card" style="background-color: #F08585;"></div>
+                    <div class="legend-text"> 6 - 12</div>
+                </div></div>
+            </div>
+        </div>
+    </div>
+   
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1IjoiZGF1ZGk5NyIsImEiOiJjanJtY3B1bjYwZ3F2NGFvOXZ1a29iMmp6In0.9ZdvuGInodgDk7cv-KlujA';
+        const map = new mapboxgl.Map({
+            container: 'map',
+            center: [55.30686965439415, 25.17884278951567], 
+            zoom: 17,
+            pitch:64,
+            bearing:110,
+            // style: 'mapbox://styles/mapbox/light-v11',
+        });
+
+        let buildingData;
+
+        const visualStyles = {
+            'air-quality':[
+                'interpolate',
+                ['linear'],
+                ['get','airQuality'],
+                80,
+                '#9FCCAD',
+                90,
+                '#FFD89C',
+                100,
+                '#F08585'
+            ],
+            'energy':[
+                'interpolate',
+                ['linear'],
+                ['get','energy'],
+                50,
+                '#415D85',
+                60,
+                '#9FCCAD',
+                70,
+                '#FFD89C',
+                80,
+                '#FFAD98',
+                90,
+                '#F08585'
+            ],
+            'sustainability':[
+                'interpolate',
+                ['linear'],
+                ['get','sustainability'],
+                50,
+                '#415D85',
+                60,
+                '#9FCCAD',
+                70,
+                '#FFD89C',
+                80,
+                '#FFAD98',
+                90,
+                '#F08585'
+            ],
+            'asset-performance':[
+                'match',
+                ['get','assetPerformance'],
+                'good',
+                '#415D85',
+                'optimal', 
+                '#9FCCAD',
+                'high', 
+                '#FFD89C',
+                'excellent', 
+                '#FFAD98',
+                'outstanding', 
+                '#F08585',
+                '#ccc'
+            ],
+            'comfort':[
+                'match',
+                ['get','comfort'],
+                'medium',
+                '#415D85',
+                'optimal', 
+                '#9FCCAD',
+                'high', 
+                '#FFD89C',
+                'customized', 
+                '#FFAD98',
+                'optimized', 
+                '#F08585',
+                '#ccc'
+            ],
+            'occupant-satisfaction':[
+                'match',
+                ['get','occupantSatisfaction'],
+                'positive',
+                '#415D85',
+                'very positive', 
+                '#9FCCAD',
+                'excellent', 
+                '#FFD89C',
+                'extremely positive',
+                '#FFAD98',
+                '#ccc'
+            ]
+        };
+
+
+        const mainPopup = new mapboxgl.Popup({ focusAfterOpen: false });
+
+        map.on("load", () => {
+            map.addSource("boundary", {
+                type:"geojson",
+                data:"boundary.geojson"
+            });
+
+            map.addLayer({
+                id:'boundary-line',
+                type:'line',
+                source:'boundary'
+            });
+
+
+            // color buildings
+            map.addSource("building", {
+                type:"geojson",
+                data:{"type":"FeatureCollection", "features":[]}
+            })
+            // markers
+
+            const layers = map.getStyle().layers;
+            // const labelLayerId = layers.find(
+            //     (layer) => layer.type === 'symbol' && layer.layout['text-field']
+            // ).id;
+            
+            // is 0-3 green color, 3.1 – 5 yellow color, 5.1 – 10 Red
+            map.addLayer({
+                'id': 'add-3d-buildings',
+                'source': 'building',
+                'type': 'fill-extrusion',
+                'minzoom': 15,
+                'paint': {
+                'fill-extrusion-color': [
+                    'interpolate',
+                    ['linear'],
+                    ['get','airQuality'],
+                    80,
+                    '#9FCCAD',
+                    90,
+                    '#FFD89C',
+                    100,
+                    '#F08585'
+                ],
+                'fill-extrusion-height': 15,
+                'fill-extrusion-base': 0,
+                'fill-extrusion-opacity': 1
+                }
+            });
+
+
+            // building click event
+            map.on("click", "add-3d-buildings", (e) => {
+                // redirect to a dashboard
+                let feature = e.features[0];
+
+                let url = `https://web.machinesensiot.com/?buildingId=${feature.properties.id}`;
+                window.open(url);
+            });
+
+
+            map.on("mousemove", "add-3d-buildings", (e) => {
+                map.getCanvas().style.cursor = "pointer";
+
+                let props = e.features[0].properties;
+                let coordinates = e.lngLat;
+
+                let  keys = ['energy', 'comfort', 'sustainability', 'airQuality', 'assetPerformance', 'occupantSatisfaction'];
+                let content = keys.map(key => {
+                    return `<div class="popup-item">
+                        <div class="attr-label">${key}</div>
+                        <div class="attr-val">${props[key]}</div>
+                    </div>`;
+                }).join("");
+            
+                let popupContent = `<div class="popup-content">
+                    <div class="popup-title">${props.name}</div>
+                    <div class="popup-body">
+                        ${content}
+                    </div>
+                </div>`;
+
+
+                mainPopup.setHTML(popupContent).setLngLat(coordinates).addTo(map);
+            });
+
+            map.on("mouseleave", "add-3d-buildings", (e) => {
+                map.getCanvas().style.cursor = "";
+                mainPopup.remove();
+            });
+
+
+            // fetch("samp_points.geojson")
+            // .then(res => res.json())
+            // .then(data => {
+            //     console.log(data);
+            //     // createMarkers(data.features);
+            // })
+            // .catch(console.error);
+
+            
+            // toggle dropdown
+            document.getElementById("dropdown-toggler").onclick = (e) => {
+                document.getElementById("dropdown-section").classList.toggle("d-none");
+            }
+
+            // dropdown item
+            Promise.all([fetch("buildings.geojson"), fetch("http://3.29.120.230:13000/building/getAllBuildings")])    
+            .then(res => Promise.all(res.map(rs => rs.json() )) )
+            .then(data => {
+                console.log(data);
+                let [ buildingGeo, buildingInfo ] = data;
+
+                // merge the data
+                buildingGeo.features = buildingGeo.features.map(ft => {
+                    let info = buildingInfo.data.find(entry => entry.id === ft.properties.id);
+
+                    ft.properties = { ...ft.properties, ...info };
+                    return ft;
+                });
+
+                buildingData = [...buildingInfo.data];
+                map.getSource("building").setData(buildingGeo);
+
+            })
+            .catch(console.error);
+            
+
+        });
+
+
+        let activeItem = document.querySelector(".dropdown-item.active");
+        let dropdownItems = document.querySelectorAll(".dropdown-item");
+        dropdownItems.forEach(item => {
+            item.onclick = (e) => {
+                handleDropdownClick(e);
+            }
+        });
+
+        function handleDropdownClick(e) {
+            let { dataset } = e.target;
+            activeItem.classList.remove("active");
+
+            if(activeItem && activeItem !== e.target) {
+                visualLizeMapBy(dataset.visual);
+
+                e.target.classList.add("active");
+                activeItem = e.target;
+            } else {
+                console.log("same visual")
+            }
+        }
+
+        function visualLizeMapBy(field) {
+            console.log(field);
+            let layerColors = visualStyles[field];
+            map.setPaintProperty("add-3d-buildings", "fill-extrusion-color", layerColors);
+
+            updateLegend(field);
+        }
+
+        function updateLegend(field) {
+            document.getElementById("legend-title").innerHTML = field.split("-").join(" ");
+
+            // updated legend colors
+            let layerColors = visualStyles[field];
+            let values = layerColors.slice(3,);
+
+            let colorBreaks = values.filter((entry, i) => i % 2 == 0);
+            let colors = values.filter((entry, i) => i % 2 )
+
+            let legendItems = colors.map((color, i) => {
+                let prevValue;
+
+                if(color.includes("#") && color != "#ccc") {
+                    if(i == 0) {
+                        prevValue = 0;
+                    } else {
+                        prevValue = colorBreaks[i - 1];
+                    }
+            
+                    return `<div class="legend-item">
+                        <div class="legend-card" style="background-color: ${color};"></div>
+                        <div class="legend-text"> ${prevValue} - ${colorBreaks[i]}</div>
+                    </div>`;
+                } else { 
+                    
+                    let value = color != "#ccc" ? color : 'Others';
+                    let colorValue = color != "#ccc" ? colorBreaks[i] : "#ccc";
+
+                    return `<div class="legend-item">
+                        <div class="legend-card" style="background-color: ${colorValue};"></div>
+                        <div class="legend-text"> ${value}</div>
+                    </div>`;
+                }
+
+                
+            }).join("");
+
+            document.getElementById("legend-body").innerHTML = legendItems;
+        }
+
+        var markers = [];
+
+        // create markers and popups
+        function createMarkers(data) {
+            markers = data.map(entry => createMarker(entry));
+        }
+
+        function createMarker(entry) {
+            let markerEl = markerElement(entry.properties);
+            let popupContent = getPopup(entry.properties);
+            let popup = new mapboxgl.Popup({focusAfterOpen:false});
+            popup.setHTML(popupContent);
+
+            let marker = new mapboxgl.Marker({element:markerEl});
+            marker.setPopup(popup).setLngLat([...entry.geometry.coordinates]).addTo(map);
+
+            markerEl.onclick = (e) => {
+                e.stopPropagation();
+                marker.togglePopup();
+            }
+            
+
+            return marker;
+        }
+
+        let markerElement = (props) => {
+            let markerDiv = document.createElement("div");
+            markerDiv.classList.add("div-marker");
+            let imageIcon, title;
+
+            if(props.ranking <= 3) {
+                imageIcon = "tim_logo.png";
+                title = "Tims";
+            } else if( props.ranking <= 5) {
+                imageIcon = "cvs-pharmacy.png";
+                title = "Pharmacy";
+            } else {
+                imageIcon = "7-eleven_logo.svg.png";
+                title = "7 Eleven";
+            }
+
+            markerDiv.innerHTML = `<div class="img-div">
+                <img src="${imageIcon}" alt=""/>
+            </div>`;
+
+            return markerDiv;
+        }
+
+        const getPopup = (props) => {
+            let title;
+
+            if(props.ranking <= 3) {
+                title = "Tims";
+            } else if( props.ranking <= 5) {
+                title = "Pharmacy";
+            } else {
+                title = "7 Eleven";
+            }
+
+            let content = Object.keys(props).map(key => {
+                return `<div class="popup-item">
+                    <div class="attr-label">${key}</div>
+                    <div class="attr-val">${props[key]}</div>
+                </div>`;
+            }).join("");
+
+            return `<div class="popup-content">
+                <div class="popup-title">${title}</div>
+                <div class="popup-body">
+                    ${content}
+                </div>
+            </div>`;
+        }
+
+
+        function getUniqueValues(data) {
+            let keys = ['energy', 'comfort', 'sustainability', 'airQuality', 'assetPerformance', 'occupantSatisfaction'];
+            let info = {};
+
+            keys.forEach(key => {
+                let values = data.map(entry => entry[key]);
+
+                info[key] = [...new Set(values)];
+            });
+
+            console.log(info);
+
+        }
+</script>
