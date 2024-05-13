@@ -458,7 +458,7 @@
             }
 
             // dropdown item
-            Promise.all([fetch("buildings.geojson"), fetch("https://app.syncstaging.com/building/getAllBuildings")])    
+            Promise.all([fetch("buildings.geojson"), fetch("https://dev.api.machinesensiot.com/building/getAllBuildings")])    
             .then(res => Promise.all(res.map(rs => rs.json() )) )
             .then(data => {
                 console.log(data);
